@@ -49,6 +49,11 @@ Header-only C++17 library provides static reflection for enums, work with any en
 * String to enum
 * Iterating over enum
 
+## Documentation
+
+* [Reference](doc/reference.md)
+* [limitations](doc/limitations.md)
+
 ## [Examples](example/example.cpp)
 
 ```cpp
@@ -185,71 +190,6 @@ enum Color { RED = 2, BLUE = 4, GREEN = 8 };
 * `magic_enum::enum_name<value>()` is much lighter on the compile times and is not restricted to the enum_range limitation.
 
 * `magic_enum::enum_names<E>()` returns `std::array<std::string_view, N>` with all string enum name where `N = number of enum values`, sorted by enum value.
-
-* `magic_enum::enum_entries<E>()` returns `std::array<std::pair<E, std::string_view>, N>` with all std::pair (value enum, string enum name) where `N = number of enum values`, sorted by enum value.
-
-* Enum value must be in range `[MAGIC_ENUM_RANGE_MIN, MAGIC_ENUM_RANGE_MAX]`. By default `MAGIC_ENUM_RANGE_MIN = -128`, `MAGIC_ENUM_RANGE_MAX = 128`.
-
-  If need another range for all enum types by default, redefine the macro `MAGIC_ENUM_RANGE_MIN` and `MAGIC_ENUM_RANGE_MAX`.
-  ```cpp
-  #define MAGIC_ENUM_RANGE_MIN 0
-  #define MAGIC_ENUM_RANGE_MAX 256
-  #include <magic_enum.hpp>
-  ```
-
-  If need another range for specific enum type, add specialization `enum_range` for necessary enum type.
-  ```cpp
-  #include <magic_enum.hpp>
-
-  enum number { one = 100, two = 200, three = 300 };
-
-  namespace magic_enum {
-  template <>
-  struct enum_range<number> {
-    static constexpr int min = 100;
-    static constexpr int max = 300;
-  };
-  }
-  ```
-
-* `magic_enum` obtains the first defined value enums, and won't work if value are aliased.
-  ```cpp
-  enum ShapeKind {
-    ConvexBegin = 0,
-    Box = 0, // Won't work.
-    Sphere = 1,
-    ConvexEnd = 2,
-    Donut = 2, // Won't work too.
-    Banana = 3,
-    COUNT = 4,
-  };
-  // magic_enum::enum_cast<ShapeKind>("Box") -> std::nullopt
-  // magic_enum::enum_name(ShapeKind::Box) -> "ConvexBegin"
-  ```
-  Work around the issue:
-  ```cpp
-  enum ShapeKind {
-    // Convex shapes, see ConvexBegin and ConvexEnd below.
-    Box = 0,
-    Sphere = 1,
-
-    // Non-convex shapes.
-    Donut = 2,
-    Banana = 3,
-
-    COUNT = Banana + 1,
-
-    // Non-reflected aliases.
-    ConvexBegin = Box,
-    ConvexEnd = Sphere + 1,
-  };
-  // magic_enum::enum_cast<ShapeKind>("Box") -> ShapeKind::Box
-  // magic_enum::enum_name(ShapeKind::Box) -> "Box"
-
-  // Non-reflected aliases.
-  // magic_enum::enum_cast<ShapeKind>("ConvexBegin") -> std::nullopt
-  // magic_enum::enum_name(ShapeKind::ConvexBegin) -> "Box"
-  ```
 
 ## Integration
 
